@@ -10,41 +10,41 @@ const { useState, useEffect, useRef } = React;
 // 2025 income → declared spring 2026 → LFI 2026 barème: +0.9% (promulguée 19 fév 2026)
 const KNOWN_BRACKETS = {
   2021: [
-    { min: 0,       max: 10225,   rate: 0    },
-    { min: 10225,   max: 26070,   rate: 0.11 },
-    { min: 26070,   max: 74545,   rate: 0.30 },
-    { min: 74545,   max: 160336,  rate: 0.41 },
-    { min: 160336,  max: Infinity, rate: 0.45 },
+    { min: 0, max: 10225, rate: 0 },
+    { min: 10225, max: 26070, rate: 0.11 },
+    { min: 26070, max: 74545, rate: 0.30 },
+    { min: 74545, max: 160336, rate: 0.41 },
+    { min: 160336, max: Infinity, rate: 0.45 },
   ],
   2022: [
-    { min: 0,       max: 10777,   rate: 0    },
-    { min: 10777,   max: 27478,   rate: 0.11 },
-    { min: 27478,   max: 78570,   rate: 0.30 },
-    { min: 78570,   max: 168994,  rate: 0.41 },
-    { min: 168994,  max: Infinity, rate: 0.45 },
+    { min: 0, max: 10777, rate: 0 },
+    { min: 10777, max: 27478, rate: 0.11 },
+    { min: 27478, max: 78570, rate: 0.30 },
+    { min: 78570, max: 168994, rate: 0.41 },
+    { min: 168994, max: Infinity, rate: 0.45 },
   ],
   2023: [
-    { min: 0,       max: 11294,   rate: 0    },
-    { min: 11294,   max: 28797,   rate: 0.11 },
-    { min: 28797,   max: 82341,   rate: 0.30 },
-    { min: 82341,   max: 177106,  rate: 0.41 },
-    { min: 177106,  max: Infinity, rate: 0.45 },
+    { min: 0, max: 11294, rate: 0 },
+    { min: 11294, max: 28797, rate: 0.11 },
+    { min: 28797, max: 82341, rate: 0.30 },
+    { min: 82341, max: 177106, rate: 0.41 },
+    { min: 177106, max: Infinity, rate: 0.45 },
   ],
   2024: [
-    { min: 0,       max: 11497,   rate: 0    },
-    { min: 11497,   max: 29315,   rate: 0.11 },
-    { min: 29315,   max: 83823,   rate: 0.30 },
-    { min: 83823,   max: 180294,  rate: 0.41 },
-    { min: 180294,  max: Infinity, rate: 0.45 },
+    { min: 0, max: 11497, rate: 0 },
+    { min: 11497, max: 29315, rate: 0.11 },
+    { min: 29315, max: 83823, rate: 0.30 },
+    { min: 83823, max: 180294, rate: 0.41 },
+    { min: 180294, max: Infinity, rate: 0.45 },
   ],
   2025: [
     // LFI 2026 promulguée 19 fév 2026 — revalorisation +0.9%
     // Source: art. 2 LFI 2026 / economie.gouv.fr
-    { min: 0,       max: 11600,   rate: 0    },
-    { min: 11600,   max: 29579,   rate: 0.11 },
-    { min: 29579,   max: 84578,   rate: 0.30 },
-    { min: 84578,   max: 181921,  rate: 0.41 },
-    { min: 181921,  max: Infinity, rate: 0.45 },
+    { min: 0, max: 11600, rate: 0 },
+    { min: 11600, max: 29579, rate: 0.11 },
+    { min: 29579, max: 84578, rate: 0.30 },
+    { min: 84578, max: 181921, rate: 0.41 },
+    { min: 181921, max: Infinity, rate: 0.45 },
   ],
 };
 
@@ -60,6 +60,17 @@ const DEDUCTION_CAP = {
 
 const CURRENT_YEAR = 2025;
 const CLAIM_WINDOW = 2; // can recover last 2 years
+
+
+function useWindowWidth() {
+  const [width, setWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1024);
+  useEffect(() => {
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
+  return width;
+}
 
 function getBrackets(year) {
   const keys = Object.keys(KNOWN_BRACKETS).map(Number).sort((a, b) => b - a);
@@ -91,10 +102,10 @@ function getDeadline(year) {
 }
 
 const STATUS_STYLES = {
-  expired:    { badge: "✕ EXPIRED",     bg: "rgba(120,60,60,0.15)",   color: "#a06060", rowBg: "rgba(120,60,60,0.03)",   border: "#2a1e1e" },
-  refundable: { badge: "⬤ REFUNDABLE",  bg: "rgba(200,160,80,0.15)",  color: "#c8a050", rowBg: "rgba(200,160,80,0.04)",  border: "rgba(200,160,80,0.25)" },
-  current:    { badge: "◯ APPLY NOW",   bg: "rgba(80,160,200,0.15)",  color: "#50a0c8", rowBg: "rgba(80,160,200,0.03)",  border: "rgba(80,160,200,0.2)" },
-  future:     { badge: "◯ FUTURE",      bg: "rgba(100,100,140,0.15)", color: "#6a6a9a", rowBg: "transparent",            border: "#1e1e2e" },
+  expired: { badge: "✕ EXPIRED", bg: "rgba(120,60,60,0.15)", color: "#a06060", rowBg: "rgba(120,60,60,0.03)", border: "#2a1e1e" },
+  refundable: { badge: "⬤ REFUNDABLE", bg: "rgba(200,160,80,0.15)", color: "#c8a050", rowBg: "rgba(200,160,80,0.04)", border: "rgba(200,160,80,0.25)" },
+  current: { badge: "◯ APPLY NOW", bg: "rgba(80,160,200,0.15)", color: "#50a0c8", rowBg: "rgba(80,160,200,0.03)", border: "rgba(80,160,200,0.2)" },
+  future: { badge: "◯ FUTURE", bg: "rgba(100,100,140,0.15)", color: "#6a6a9a", rowBg: "transparent", border: "#1e1e2e" },
 };
 
 const FAMILY_PARTS = {
@@ -257,6 +268,8 @@ function App() {
   const [bonusMethod, setBonusMethod] = useState("flatrate");
   const [customPct, setCustomPct] = useState(30);
 
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth < 700;
   const parts = FAMILY_PARTS[family];
   const exemptPct = bonusMethod === "flatrate" ? 30 : customPct;
 
@@ -285,13 +298,13 @@ function App() {
   });
 
   const refundableRows = rows.filter(r => r.status === "refundable");
-  const currentRows    = rows.filter(r => r.status === "current");
-  const futureRows     = rows.filter(r => r.status === "future");
-  const expiredRows    = rows.filter(r => r.status === "expired");
+  const currentRows = rows.filter(r => r.status === "current");
+  const futureRows = rows.filter(r => r.status === "future");
+  const expiredRows = rows.filter(r => r.status === "expired");
 
-  const totalRefund  = refundableRows.reduce((s, r) => s + r.saving, 0);
+  const totalRefund = refundableRows.reduce((s, r) => s + r.saving, 0);
   const totalForward = [...currentRows, ...futureRows].reduce((s, r) => s + r.saving, 0);
-  const grandTotal   = totalRefund + totalForward;
+  const grandTotal = totalRefund + totalForward;
 
   const syncSalary = () => {
     const base = salaries[CURRENT_YEAR] ?? salaries[regimeYears[0]] ?? 80000;
@@ -313,7 +326,7 @@ function App() {
       <div style={{
         background: "linear-gradient(135deg, #1a1a2e 0%, #0a0a0f 60%)",
         borderBottom: "1px solid #2a2a3e",
-        padding: "36px 40px 28px",
+        padding: isMobile ? "24px 16px 20px" : "36px 40px 28px",
         position: "relative", overflow: "hidden",
       }}>
         <div style={{
@@ -332,10 +345,10 @@ function App() {
         </p>
       </div>
 
-      <div style={{ padding: "28px 40px", maxWidth: "980px", margin: "0 auto" }}>
+      <div style={{ padding: isMobile ? "16px 12px" : "28px 40px", maxWidth: "980px", margin: "0 auto" }}>
 
         {/* Settings row */}
-        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 1fr", gap: "14px", marginBottom: "28px", alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "auto 1fr 1fr", gap: "14px", marginBottom: "28px", alignItems: "start" }}>
 
           {/* Arrival year */}
           <div style={{ background: "#12121c", border: "1px solid rgba(200,160,80,0.3)", borderRadius: "8px", padding: "18px 20px", minWidth: "180px" }}>
@@ -415,22 +428,22 @@ function App() {
         <div style={{
           background: "linear-gradient(135deg, rgba(200,160,80,0.10), rgba(200,160,80,0.02))",
           border: "1px solid rgba(200,160,80,0.28)",
-          borderRadius: "10px", padding: "22px 28px", marginBottom: "28px",
-          display: "grid", gridTemplateColumns: "1fr 1px 1fr 1px 1fr",
+          borderRadius: "10px", padding: isMobile ? "16px 14px" : "22px 28px", marginBottom: "28px", gap: isMobile ? "14px" : "0",
+          display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1px 1fr 1px 1fr",
           alignItems: "center",
         }}>
           {[
-            { title: "Retroactive Refund", value: totalRefund, sub: refundableRows.length ? `${refundableRows.map(r=>r.year).join(" + ")} · Claim now` : "No refundable years", color: "#f0ebe0" },
+            { title: "Retroactive Refund", value: totalRefund, sub: refundableRows.length ? `${refundableRows.map(r => r.year).join(" + ")} · Claim now` : "No refundable years", color: "#f0ebe0" },
             null,
-            { title: "Forward Savings", value: totalForward, sub: `${[...currentRows,...futureRows].length} years remaining`, color: "#8a8aaa" },
+            { title: "Forward Savings", value: totalForward, sub: `${[...currentRows, ...futureRows].length} years remaining`, color: "#8a8aaa" },
             null,
             { title: "Total Benefit", value: grandTotal, sub: `Over ${rows.length} years of the regime`, color: "#c8a050" },
           ].map((item, i) => item === null
-            ? <div key={i} style={{ width: "1px", background: "#2a2a3e", alignSelf: "stretch" }} />
+            ? (isMobile ? null : <div key={i} style={{ width: "1px", background: "#2a2a3e", alignSelf: "stretch" }} />)
             : (
-              <div key={i} style={{ padding: "0 20px" }}>
+              <div key={i} style={{ padding: isMobile ? "0" : "0 20px" }}>
                 <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#6a6560", textTransform: "uppercase", marginBottom: "6px" }}>{item.title}</div>
-                <div style={{ fontSize: "30px", color: item.color, letterSpacing: "-1px" }}>{formatEur(item.value)}</div>
+                <div style={{ fontSize: isMobile ? "22px" : "30px", color: item.color, letterSpacing: "-1px" }}>{formatEur(item.value)}</div>
                 <div style={{ fontSize: "11px", color: "#5a5560", marginTop: "4px" }}>{item.sub}</div>
               </div>
             )
@@ -455,152 +468,232 @@ function App() {
             </button>
           </div>
 
-          {/* Column headers */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "60px 130px 1fr 1fr 1fr 1fr 1fr 1fr",
-            gap: "0 8px",
-            padding: "8px 14px",
-            background: "#0d0d18",
-            borderRadius: "8px 8px 0 0",
-            border: "1px solid #1e1e30",
-            borderBottom: "none",
-          }}>
-            {[
-              { label: "Year",          tip: "The income year. The impatriate regime applies from your year of arrival for up to 8 calendar years (art. 155 B CGI)." },
-              { label: "Status",        tip: "REFUNDABLE: you can file an amended return to recover overpaid tax. APPLY NOW: file when declaring this year's income. FUTURE: upcoming years where the regime will apply. EXPIRED: beyond the 2-year claim window — cannot be recovered." },
-              { label: "Gross Salary",  tip: "Your gross annual salary (brut), assumed to be net of social charges (cotisations sociales). Click any value to adjust it with a slider or by typing." },
-              { label: "Exempt",        tip: "The prime d'impatriation: the portion of your salary exempt from income tax under the regime. Flat-rate = 30% of gross salary (BOFiP BOI-RSA-GEO-40-10-20 §90). Capped at 50% of gross (art. 155 B I CGI)." },
-              { label: "Taxable Income",tip: "Your net taxable income after applying the impatriate exemption and the 10% frais professionnels deduction (art. 83 CGI). This is the base on which your income tax is actually computed under the regime." },
-              { label: "Tax without",   tip: "Estimated income tax without the impatriate regime, computed on your net salary after the 10% frais professionnels deduction only, using the official progressive barème (art. 197 CGI) for this income year." },
-              { label: "Tax with",      tip: "Estimated income tax with the impatriate regime applied, computed on the reduced taxable base (after exemption). The difference between this and 'Tax without' is your annual saving." },
-              { label: "Saving",        tip: "Annual tax saving = Tax without regime − Tax with regime. The percentage shown is your effective tax rate (tax ÷ gross salary) shifting from the standard rate to the impatriate rate." },
-            ].map(({ label, tip }, i) => (
-              <div key={i} style={{
-                fontSize: "10px", letterSpacing: "1px", textTransform: "uppercase",
-                color: "#4a4a5a", textAlign: i >= 2 ? "right" : "left",
-              }}>
-                <Tooltip text={tip}>
-                  <span style={{ borderBottom: "1px dashed #3a3a5a", paddingBottom: "1px" }}>{label}</span>
-                </Tooltip>
-              </div>
-            ))}
-          </div>
-
-          {/* Rows */}
-          <div style={{ border: "1px solid #1e1e30", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
-            {rows.map((row, ri) => {
-              const st = STATUS_STYLES[row.status];
-              const isExpired = row.status === "expired";
-              return (
-                <div key={row.year} style={{
-                  borderBottom: ri < rows.length - 1 ? "1px solid #14141e" : "none",
-                  background: st.rowBg,
-                  opacity: isExpired ? 0.5 : 1,
-                }}>
-                  {/* Main data row */}
-                  <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "60px 130px 1fr 1fr 1fr 1fr 1fr 1fr",
-                    gap: "0 8px",
-                    padding: "12px 14px",
-                    alignItems: "center",
+          {/* Table — desktop grid or mobile cards */}
+          {isMobile ? (
+            /* Mobile: one card per year */
+            <div style={{ border: "1px solid #1e1e30", borderRadius: "8px", overflow: "hidden" }}>
+              {rows.map((row, ri) => {
+                const st = STATUS_STYLES[row.status];
+                const isExpired = row.status === "expired";
+                return (
+                  <div key={row.year} style={{
+                    borderBottom: ri < rows.length - 1 ? "1px solid #14141e" : "none",
+                    background: st.rowBg,
+                    opacity: isExpired ? 0.5 : 1,
+                    padding: "14px 14px",
                   }}>
-                    {/* Year */}
-                    <div>
-                      <Tooltip text={`Income year ${row.year}${row.estimated ? " (estimated — using nearest known barème as proxy)" : ""}. Tax declared in spring ${row.year + 1}. Barème: ${row.estimated ? "proxy from nearest known year" : `official LFI ${row.year + 1}`}.`}>
-                        <div style={{ color: "#f0ebe0", fontWeight: "bold", fontSize: "15px", display: "inline-block", cursor: "help" }}>{row.year}</div>
-                      </Tooltip>
-                      {row.estimated && <div style={{ fontSize: "9px", color: "#4a4a6a" }}>est.</div>}
-                    </div>
-
-                    {/* Status */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
-                      <Tooltip text={
-                        row.status === "refundable" ? `You can file a réclamation contentieuse (amended return) for ${row.year} income before ${getDeadline(row.year)}. Deadline = Dec 31 of the 2nd year after assessment (income year + 1 + 2). Source: impots.gouv.fr/particulier/delais-de-reclamation.`
-                        : row.status === "current" ? `Declare the impatriate exemption on your ${row.year} income tax return (filed spring ${row.year + 1}). Use the "autres renseignements" section of form 2042.`
-                        : row.status === "future" ? `Upcoming year within your 8-year regime window. The exemption will apply automatically if you remain with your employer and are tax-resident in France.`
-                        : `This year is outside the 2-year amendment window (délai de réclamation). Tax paid for ${row.year} cannot be recovered.`
-                      }>
-                        <span style={{ fontSize: "9px", letterSpacing: "1px", padding: "2px 7px", borderRadius: "20px", background: st.bg, color: st.color, whiteSpace: "nowrap", display: "inline-block", cursor: "help" }}>
+                    {/* Card header: year + status */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+                      <div>
+                        <span style={{ color: "#f0ebe0", fontWeight: "bold", fontSize: "16px" }}>{row.year}</span>
+                        {row.estimated && <span style={{ fontSize: "9px", color: "#4a4a6a", marginLeft: "6px" }}>est.</span>}
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "3px", alignItems: "flex-end" }}>
+                        <span style={{ fontSize: "9px", letterSpacing: "1px", padding: "2px 7px", borderRadius: "20px", background: st.bg, color: st.color, whiteSpace: "nowrap" }}>
                           {st.badge}
                         </span>
-                      </Tooltip>
-                      {row.status === "refundable" && (
-                        <span style={{ fontSize: "9px", color: "#c8a050" }}>⏰ {getDeadline(row.year)}</span>
-                      )}
+                        {row.status === "refundable" && (
+                          <span style={{ fontSize: "9px", color: "#c8a050" }}>⏰ {getDeadline(row.year)}</span>
+                        )}
+                      </div>
                     </div>
-
-                    {/* Salary cell — inline slider */}
-                    <div style={{ textAlign: "right" }}>
-                      <SalaryCell
-                        value={salaries[row.year] ?? 80000}
-                        onChange={val => updateSalary(row.year, val)}
-                      />
+                    {/* Salary slider */}
+                    <div style={{ marginBottom: "12px" }}>
+                      <div style={{ fontSize: "9px", color: "#5a5560", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "6px" }}>Gross Salary</div>
+                      <SalaryCell value={salaries[row.year] ?? 80000} onChange={val => updateSalary(row.year, val)} />
                     </div>
-
-                    <div style={{ textAlign: "right" }}>
-                      <Tooltip text={`Prime d'impatriation (forfait ${exemptPct}%): ${exemptPct}% × ${formatEur(row.gross)} = ${formatEur(row.rawExemption)}${row.cappedByGlobal ? ` → capped at 50% max = ${formatEur(row.exemption)}` : ""}. Source: BOFiP BOI-RSA-GEO-40-10-20 §90.`}>
-                        <div style={{ color: "#c8a050", fontSize: "13px", display: "inline-block" }}>{formatEur(row.exemption)}</div>
-                      </Tooltip>
-                      {row.cappedByGlobal && (
-                        <div style={{ fontSize: "9px", color: "#a06030", marginTop: "2px" }}>⚠ 50% cap applied</div>
-                      )}
+                    {/* Data grid 2-col */}
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 12px" }}>
+                      {[
+                        { label: "Exempt", value: formatEur(row.exemption), color: "#c8a050", sub: row.cappedByGlobal ? "⚠ 50% cap" : null },
+                        { label: "Taxable Income", value: formatEur(row.taxableWithRegime), color: "#8a8aff", sub: `of ${formatEur(row.net)}` },
+                        { label: "Tax without", value: formatEur(row.taxWithout), color: "#6a6070", sub: null },
+                        { label: "Tax with", value: formatEur(row.taxWith), color: "#e8e4dc", sub: null },
+                      ].map(({ label, value, color, sub }) => (
+                        <div key={label}>
+                          <div style={{ fontSize: "9px", color: "#5a5560", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "2px" }}>{label}</div>
+                          <div style={{ fontSize: "13px", color, fontFamily: "monospace" }}>{value}</div>
+                          {sub && <div style={{ fontSize: "9px", color: "#5a5560", marginTop: "1px" }}>{sub}</div>}
+                        </div>
+                      ))}
                     </div>
-                    <div style={{ textAlign: "right" }}>
-                      <Tooltip text={`Step 1 — 10% frais professionnels deduction (art. 83 CGI): ${formatEur(row.gross)} × 90% = ${formatEur(row.net)} (net imposable). Step 2 — Deduct impatriate exemption: ${formatEur(row.net)} − ${formatEur(row.exemption)} = ${formatEur(row.taxableWithRegime)}. This is the base taxed at the progressive barème.`}>
-                        <div style={{ color: "#8a8aff", fontSize: "13px", display: "inline-block" }}>{formatEur(row.taxableWithRegime)}</div>
-                      </Tooltip>
-                      <div style={{ fontSize: "10px", color: "#4a4a6a", marginTop: "2px" }}>of {formatEur(row.net)}</div>
-                    </div>
-                    <Tooltip text={`Progressive barème (art. 197 CGI) applied to ${formatEur(row.net)} net imposable (gross minus 10% deduction). Divided by ${parts} part(s) for quotient familial, taxed by bracket, then multiplied back. No impatriate exemption applied here.`}>
-                      <div style={{ textAlign: "right", color: "#6a6070", fontSize: "13px", cursor: "help" }}>{formatEur(row.taxWithout)}</div>
-                    </Tooltip>
-                    <Tooltip text={`Progressive barème (art. 197 CGI) applied to the reduced taxable base of ${formatEur(row.taxableWithRegime)} (after impatriate exemption). Divided by ${parts} part(s), taxed by bracket, then multiplied back.`}>
-                      <div style={{ textAlign: "right", color: "#e8e4dc", fontSize: "13px", cursor: "help" }}>{formatEur(row.taxWith)}</div>
-                    </Tooltip>
-                    <div style={{ textAlign: "right" }}>
-                      {isExpired ? (
-                        <span style={{ fontSize: "11px", color: "#6a4040" }}>Expired</span>
-                      ) : (
-                        <>
-                          <Tooltip text={`Annual saving = Tax without (${formatEur(row.taxWithout)}) − Tax with regime (${formatEur(row.taxWith)}) = ${formatEur(row.saving)}. Effective rate: ${row.effWithout.toFixed(2)}% → ${row.effWith.toFixed(2)}% (tax ÷ gross salary).`}>
-                            <div style={{ color: "#c8a050", fontWeight: "bold", fontSize: "13px", display: "inline-block", cursor: "help" }}>{formatEur(row.saving)}</div>
-                          </Tooltip>
-                          <div style={{ fontSize: "10px", color: "#5a5560", marginTop: "2px" }}>
-                            {row.effWithout.toFixed(1)}% → {row.effWith.toFixed(1)}%
-                          </div>
-                        </>
-                      )}
-                    </div>
+                    {/* Saving */}
+                    {!isExpired && (
+                      <div style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px solid #1e1e2e", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span style={{ fontSize: "9px", color: "#5a5560", letterSpacing: "1px", textTransform: "uppercase" }}>Saving</span>
+                        <div style={{ textAlign: "right" }}>
+                          <div style={{ color: "#c8a050", fontWeight: "bold", fontSize: "16px" }}>{formatEur(row.saving)}</div>
+                          <div style={{ fontSize: "10px", color: "#5a5560" }}>{row.effWithout.toFixed(1)}% → {row.effWith.toFixed(1)}%</div>
+                        </div>
+                      </div>
+                    )}
                   </div>
+                );
+              })}
+              {/* Footer totals */}
+              <div style={{ padding: "14px", background: "#12121c", borderTop: "2px solid #2a2a3e", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: "9px", color: "#5a5560", letterSpacing: "1px", textTransform: "uppercase" }}>Refundable</div>
+                  <div style={{ color: "#f0ebe0", fontSize: "14px", fontFamily: "monospace" }}>{formatEur(totalRefund)}</div>
                 </div>
-              );
-            })}
-
-            {/* Footer totals */}
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: "60px 130px 1fr 1fr 1fr 1fr 1fr 1fr",
-              gap: "0 8px",
-              padding: "13px 14px",
-              background: "#12121c",
-              borderTop: "2px solid #2a2a3e",
-              alignItems: "center",
-            }}>
-              <div style={{ gridColumn: "1 / 7", fontSize: "10px", color: "#6a6560", letterSpacing: "1px", textTransform: "uppercase" }}>
-                Total · {rows.filter(r => r.status !== "expired").length} active years
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "10px", color: "#5a5560" }}>Refundable</div>
-                <div style={{ color: "#f0ebe0", fontSize: "13px" }}>{formatEur(totalRefund)}</div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "10px", color: "#5a5560" }}>Grand total</div>
-                <div style={{ color: "#c8a050", fontSize: "18px" }}>{formatEur(grandTotal)}</div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "9px", color: "#5a5560", letterSpacing: "1px", textTransform: "uppercase" }}>Grand Total</div>
+                  <div style={{ color: "#c8a050", fontSize: "20px", fontFamily: "monospace" }}>{formatEur(grandTotal)}</div>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            /* Desktop: traditional grid table */
+            <div>
+              {/* Column headers */}
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "60px 130px 1fr 1fr 1fr 1fr 1fr 1fr",
+                gap: "0 8px",
+                padding: "8px 14px",
+                background: "#0d0d18",
+                borderRadius: "8px 8px 0 0",
+                border: "1px solid #1e1e30",
+                borderBottom: "none",
+              }}>
+                {[
+                  { label: "Year", tip: "The income year. The impatriate regime applies from your year of arrival for up to 8 calendar years (art. 155 B CGI)." },
+                  { label: "Status", tip: "REFUNDABLE: you can file an amended return to recover overpaid tax. APPLY NOW: file when declaring this year's income. FUTURE: upcoming years where the regime will apply. EXPIRED: beyond the 2-year claim window — cannot be recovered." },
+                  { label: "Gross Salary", tip: "Your gross annual salary (brut), assumed to be net of social charges (cotisations sociales). Click any value to adjust it with a slider or by typing." },
+                  { label: "Exempt", tip: "The prime d'impatriation: the portion of your salary exempt from income tax under the regime. Flat-rate = 30% of gross salary (BOFiP BOI-RSA-GEO-40-10-20 §90). Capped at 50% of gross (art. 155 B I CGI)." },
+                  { label: "Taxable Income", tip: "Your net taxable income after applying the impatriate exemption and the 10% frais professionnels deduction (art. 83 CGI). This is the base on which your income tax is actually computed under the regime." },
+                  { label: "Tax without", tip: "Estimated income tax without the impatriate regime, computed on your net salary after the 10% frais professionnels deduction only, using the official progressive barème (art. 197 CGI) for this income year." },
+                  { label: "Tax with", tip: "Estimated income tax with the impatriate regime applied, computed on the reduced taxable base (after exemption). The difference between this and 'Tax without' is your annual saving." },
+                  { label: "Saving", tip: "Annual tax saving = Tax without regime − Tax with regime. The percentage shown is your effective tax rate (tax ÷ gross salary) shifting from the standard rate to the impatriate rate." },
+                ].map(({ label, tip }, i) => (
+                  <div key={i} style={{
+                    fontSize: "10px", letterSpacing: "1px", textTransform: "uppercase",
+                    color: "#4a4a5a", textAlign: i >= 2 ? "right" : "left",
+                  }}>
+                    <Tooltip text={tip}>
+                      <span style={{ borderBottom: "1px dashed #3a3a5a", paddingBottom: "1px" }}>{label}</span>
+                    </Tooltip>
+                  </div>
+                ))}
+              </div>
+
+              {/* Rows */}
+              <div style={{ border: "1px solid #1e1e30", borderRadius: "0 0 8px 8px", overflow: "hidden" }}>
+                {rows.map((row, ri) => {
+                  const st = STATUS_STYLES[row.status];
+                  const isExpired = row.status === "expired";
+                  return (
+                    <div key={row.year} style={{
+                      borderBottom: ri < rows.length - 1 ? "1px solid #14141e" : "none",
+                      background: st.rowBg,
+                      opacity: isExpired ? 0.5 : 1,
+                    }}>
+                      {/* Main data row */}
+                      <div style={{
+                        display: "grid",
+                        gridTemplateColumns: "60px 130px 1fr 1fr 1fr 1fr 1fr 1fr",
+                        gap: "0 8px",
+                        padding: "12px 14px",
+                        alignItems: "center",
+                      }}>
+                        {/* Year */}
+                        <div>
+                          <Tooltip text={`Income year ${row.year}${row.estimated ? " (estimated — using nearest known barème as proxy)" : ""}. Tax declared in spring ${row.year + 1}. Barème: ${row.estimated ? "proxy from nearest known year" : `official LFI ${row.year + 1}`}.`}>
+                            <div style={{ color: "#f0ebe0", fontWeight: "bold", fontSize: "15px", display: "inline-block", cursor: "help" }}>{row.year}</div>
+                          </Tooltip>
+                          {row.estimated && <div style={{ fontSize: "9px", color: "#4a4a6a" }}>est.</div>}
+                        </div>
+
+                        {/* Status */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
+                          <Tooltip text={
+                            row.status === "refundable" ? `You can file a réclamation contentieuse (amended return) for ${row.year} income before ${getDeadline(row.year)}. Deadline = Dec 31 of the 2nd year after assessment (income year + 1 + 2). Source: impots.gouv.fr/particulier/delais-de-reclamation.`
+                              : row.status === "current" ? `Declare the impatriate exemption on your ${row.year} income tax return (filed spring ${row.year + 1}). Use the "autres renseignements" section of form 2042.`
+                                : row.status === "future" ? `Upcoming year within your 8-year regime window. The exemption will apply automatically if you remain with your employer and are tax-resident in France.`
+                                  : `This year is outside the 2-year amendment window (délai de réclamation). Tax paid for ${row.year} cannot be recovered.`
+                          }>
+                            <span style={{ fontSize: "9px", letterSpacing: "1px", padding: "2px 7px", borderRadius: "20px", background: st.bg, color: st.color, whiteSpace: "nowrap", display: "inline-block", cursor: "help" }}>
+                              {st.badge}
+                            </span>
+                          </Tooltip>
+                          {row.status === "refundable" && (
+                            <span style={{ fontSize: "9px", color: "#c8a050" }}>⏰ {getDeadline(row.year)}</span>
+                          )}
+                        </div>
+
+                        {/* Salary cell — inline slider */}
+                        <div style={{ textAlign: "right" }}>
+                          <SalaryCell
+                            value={salaries[row.year] ?? 80000}
+                            onChange={val => updateSalary(row.year, val)}
+                          />
+                        </div>
+
+                        <div style={{ textAlign: "right" }}>
+                          <Tooltip text={`Prime d'impatriation (forfait ${exemptPct}%): ${exemptPct}% × ${formatEur(row.gross)} = ${formatEur(row.rawExemption)}${row.cappedByGlobal ? ` → capped at 50% max = ${formatEur(row.exemption)}` : ""}. Source: BOFiP BOI-RSA-GEO-40-10-20 §90.`}>
+                            <div style={{ color: "#c8a050", fontSize: "13px", display: "inline-block" }}>{formatEur(row.exemption)}</div>
+                          </Tooltip>
+                          {row.cappedByGlobal && (
+                            <div style={{ fontSize: "9px", color: "#a06030", marginTop: "2px" }}>⚠ 50% cap applied</div>
+                          )}
+                        </div>
+                        <div style={{ textAlign: "right" }}>
+                          <Tooltip text={`Step 1 — 10% frais professionnels deduction (art. 83 CGI): ${formatEur(row.gross)} × 90% = ${formatEur(row.net)} (net imposable). Step 2 — Deduct impatriate exemption: ${formatEur(row.net)} − ${formatEur(row.exemption)} = ${formatEur(row.taxableWithRegime)}. This is the base taxed at the progressive barème.`}>
+                            <div style={{ color: "#8a8aff", fontSize: "13px", display: "inline-block" }}>{formatEur(row.taxableWithRegime)}</div>
+                          </Tooltip>
+                          <div style={{ fontSize: "10px", color: "#4a4a6a", marginTop: "2px" }}>of {formatEur(row.net)}</div>
+                        </div>
+                        <Tooltip text={`Progressive barème (art. 197 CGI) applied to ${formatEur(row.net)} net imposable (gross minus 10% deduction). Divided by ${parts} part(s) for quotient familial, taxed by bracket, then multiplied back. No impatriate exemption applied here.`}>
+                          <div style={{ textAlign: "right", color: "#6a6070", fontSize: "13px", cursor: "help" }}>{formatEur(row.taxWithout)}</div>
+                        </Tooltip>
+                        <Tooltip text={`Progressive barème (art. 197 CGI) applied to the reduced taxable base of ${formatEur(row.taxableWithRegime)} (after impatriate exemption). Divided by ${parts} part(s), taxed by bracket, then multiplied back.`}>
+                          <div style={{ textAlign: "right", color: "#e8e4dc", fontSize: "13px", cursor: "help" }}>{formatEur(row.taxWith)}</div>
+                        </Tooltip>
+                        <div style={{ textAlign: "right" }}>
+                          {isExpired ? (
+                            <span style={{ fontSize: "11px", color: "#6a4040" }}>Expired</span>
+                          ) : (
+                            <>
+                              <Tooltip text={`Annual saving = Tax without (${formatEur(row.taxWithout)}) − Tax with regime (${formatEur(row.taxWith)}) = ${formatEur(row.saving)}. Effective rate: ${row.effWithout.toFixed(2)}% → ${row.effWith.toFixed(2)}% (tax ÷ gross salary).`}>
+                                <div style={{ color: "#c8a050", fontWeight: "bold", fontSize: "13px", display: "inline-block", cursor: "help" }}>{formatEur(row.saving)}</div>
+                              </Tooltip>
+                              <div style={{ fontSize: "10px", color: "#5a5560", marginTop: "2px" }}>
+                                {row.effWithout.toFixed(1)}% → {row.effWith.toFixed(1)}%
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Footer totals */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "60px 130px 1fr 1fr 1fr 1fr 1fr 1fr",
+                  gap: "0 8px",
+                  padding: "13px 14px",
+                  background: "#12121c",
+                  borderTop: "2px solid #2a2a3e",
+                  alignItems: "center",
+                }}>
+                  <div style={{ gridColumn: "1 / 7", fontSize: "10px", color: "#6a6560", letterSpacing: "1px", textTransform: "uppercase" }}>
+                    Total · {rows.filter(r => r.status !== "expired").length} active years
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: "10px", color: "#5a5560" }}>Refundable</div>
+                    <div style={{ color: "#f0ebe0", fontSize: "13px" }}>{formatEur(totalRefund)}</div>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontSize: "10px", color: "#5a5560" }}>Grand total</div>
+                    <div style={{ color: "#c8a050", fontSize: "18px" }}>{formatEur(grandTotal)}</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
 
           {expiredRows.length > 0 && (
             <div style={{ marginTop: "8px", fontSize: "11px", color: "#6a4040", padding: "0 4px" }}>
