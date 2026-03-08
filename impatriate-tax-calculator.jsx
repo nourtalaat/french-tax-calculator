@@ -203,134 +203,50 @@ function Tooltip({ text, children }) {
   );
 }
 
-// Expanded salary editor: slider + manual text input
-function SalaryEditor({ value, onChange, onClose }) {
-  const [draft, setDraft] = useState(String(value));
-  const [textEditing, setTextEditing] = useState(false);
+// Inline slider cell — click value to type custom amount outside slider bounds
+function SalaryCell({ value, onChange }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
 
-  const commitText = () => {
+  const startEdit = () => { setDraft(String(value)); setEditing(true); };
+  const commit = () => {
     const n = parseInt(draft.replace(/[^0-9]/g, ""), 10);
-    if (!isNaN(n) && n >= 1000 && n <= 2000000) { onChange(n); setDraft(String(n)); }
-    else setDraft(String(value));
-    setTextEditing(false);
+    if (!isNaN(n) && n >= 1) onChange(n);
+    setEditing(false);
   };
 
   return (
-    <div style={{
-      background: "#0e0e1a",
-      border: "1px solid rgba(200,160,80,0.35)",
-      borderRadius: "8px",
-      padding: "14px 16px",
-      display: "flex", flexDirection: "column", gap: "10px",
-      boxShadow: "0 4px 24px rgba(0,0,0,0.4)",
-    }}>
-      {/* Value display + text input toggle */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: "10px", letterSpacing: "2px", color: "#6a6560", textTransform: "uppercase" }}>Gross Salary</span>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {textEditing ? (
-            <>
-              <span style={{ fontSize: "11px", color: "#c8a050" }}>€</span>
-              <input
-                autoFocus
-                value={draft}
-                onChange={e => setDraft(e.target.value)}
-                onBlur={commitText}
-                onKeyDown={e => { if (e.key === "Enter") commitText(); if (e.key === "Escape") { setDraft(String(value)); setTextEditing(false); } }}
-                style={{
-                  background: "#1a1a2e", border: "2px solid #c8a050",
-                  boxShadow: "0 0 0 3px rgba(200,160,80,0.12)",
-                  color: "#f0ebe0", padding: "4px 8px", borderRadius: "5px",
-                  fontSize: "16px", width: "110px", textAlign: "right",
-                  fontFamily: "monospace", outline: "none",
-                }}
-              />
-              <button onMouseDown={e => { e.preventDefault(); commitText(); }} style={{
-                background: "#c8a050", border: "none", color: "#0a0a0f",
-                width: "24px", height: "24px", borderRadius: "4px",
-                cursor: "pointer", fontSize: "12px", fontWeight: "bold",
-              }}>✓</button>
-            </>
-          ) : (
-            <button
-              onClick={() => { setDraft(String(value)); setTextEditing(true); }}
-              title="Click to type a value"
-              style={{
-                background: "rgba(200,160,80,0.08)", border: "1px solid rgba(200,160,80,0.25)",
-                borderRadius: "5px", padding: "4px 10px 4px 12px",
-                color: "#f0ebe0", fontSize: "17px", fontFamily: "monospace",
-                cursor: "text", display: "inline-flex", alignItems: "center", gap: "7px",
-                letterSpacing: "0.3px",
-              }}
-            >
-              {formatEur(value)}
-              <span style={{ fontSize: "12px", color: "#c8a050" }}>✎</span>
-            </button>
-          )}
-          <button onClick={onClose} title="Close" style={{
-            background: "none", border: "1px solid #2a2a3e", color: "#5a5560",
-            width: "24px", height: "24px", borderRadius: "4px",
-            cursor: "pointer", fontSize: "14px", lineHeight: 1,
-          }}>×</button>
-        </div>
-      </div>
-
-      {/* Slider */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <span style={{ fontSize: "10px", color: "#3a3a4a", minWidth: "28px" }}>€30k</span>
+    <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end" }}>
+      {editing ? (
         <input
-          type="range" min="30000" max="300000" step="1000"
-          value={value}
-          onChange={e => { const n = Number(e.target.value); onChange(n); setDraft(String(n)); }}
-          style={{ flex: 1, accentColor: "#c8a050", cursor: "pointer", height: "4px" }}
+          autoFocus
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={commit}
+          onKeyDown={e => { if (e.key === "Enter") commit(); if (e.key === "Escape") setEditing(false); }}
+          style={{
+            background: "#1a1a2e", border: "1px solid #c8a050",
+            color: "#f0ebe0", padding: "2px 6px", borderRadius: "4px",
+            fontSize: "13px", width: "90px", textAlign: "right",
+            fontFamily: "monospace", outline: "none",
+          }}
         />
-        <span style={{ fontSize: "10px", color: "#3a3a4a", minWidth: "32px", textAlign: "right" }}>€300k</span>
-      </div>
-
-      {/* Quick presets */}
-      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-        {[40000, 60000, 80000, 100000, 120000, 150000, 200000].map(v => (
-          <button key={v} onClick={() => { onChange(v); setDraft(String(v)); }} style={{
-            background: value === v ? "rgba(200,160,80,0.2)" : "rgba(255,255,255,0.03)",
-            border: `1px solid ${value === v ? "rgba(200,160,80,0.5)" : "#2a2a3e"}`,
-            color: value === v ? "#c8a050" : "#5a5560",
-            padding: "3px 8px", borderRadius: "4px", fontSize: "10px",
-            cursor: "pointer", letterSpacing: "0.5px",
-          }}>€{v >= 1000 ? (v/1000)+"k" : v}</button>
-        ))}
-      </div>
+      ) : (
+        <span
+          onClick={startEdit}
+          title="Click to type a custom value"
+          style={{ fontSize: "13px", fontFamily: "monospace", color: "#c8a050", letterSpacing: "0.3px", cursor: "text", borderBottom: "1px dashed rgba(200,160,80,0.4)" }}
+        >
+          {formatEur(value)}
+        </span>
+      )}
+      <input
+        type="range" min="30000" max="300000" step="1000"
+        value={Math.min(Math.max(value, 30000), 300000)}
+        onChange={e => onChange(Number(e.target.value))}
+        style={{ width: "120px", accentColor: "#c8a050", cursor: "pointer", height: "4px" }}
+      />
     </div>
-  );
-}
-
-// Collapsed pill button that shows the salary and opens the editor
-function SalaryCell({ value, onChange }) {
-  const [open, setOpen] = useState(false);
-  const [hovered, setHovered] = useState(false);
-
-  if (open) {
-    return <SalaryEditor value={value} onChange={onChange} onClose={() => setOpen(false)} />;
-  }
-
-  return (
-    <button
-      onClick={() => setOpen(true)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      title="Click to adjust salary"
-      style={{
-        display: "inline-flex", alignItems: "center", gap: "7px",
-        background: hovered ? "rgba(200,160,80,0.12)" : "rgba(200,160,80,0.05)",
-        border: `1px solid ${hovered ? "rgba(200,160,80,0.5)" : "rgba(200,160,80,0.2)"}`,
-        borderRadius: "6px", padding: "5px 10px 5px 12px",
-        cursor: "pointer", transition: "all 0.15s",
-        color: hovered ? "#c8a050" : "#e8e4dc",
-        fontSize: "14px", fontFamily: "monospace", letterSpacing: "0.3px",
-      }}
-    >
-      {formatEur(value)}
-      <span style={{ fontSize: "11px", color: hovered ? "#c8a050" : "#5a5060", transition: "color 0.15s" }}>✎</span>
-    </button>
   );
 }
 
@@ -616,16 +532,12 @@ export default function App() {
                       )}
                     </div>
 
-                    {/* Salary cell — opens editor below */}
+                    {/* Salary cell — inline slider */}
                     <div style={{ textAlign: "right" }}>
-                      <Tooltip text={`Gross annual salary (brut) for ${row.year}, assumed net of social charges (cotisations sociales ~22% employee). Click to adjust with a slider or type a custom value. The 10% frais professionnels deduction (art. 83 CGI) is applied automatically in the calculation.`}>
-                        <span style={{ display: "inline-block" }}>
-                          <SalaryCell
-                            value={salaries[row.year] ?? 80000}
-                            onChange={val => updateSalary(row.year, val)}
-                          />
-                        </span>
-                      </Tooltip>
+                      <SalaryCell
+                        value={salaries[row.year] ?? 80000}
+                        onChange={val => updateSalary(row.year, val)}
+                      />
                     </div>
 
                     <div style={{ textAlign: "right" }}>
